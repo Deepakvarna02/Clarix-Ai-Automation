@@ -21,12 +21,33 @@ const mapInsightItem = (item) => ({
   content: item.content || ''
 });
 
+// Helper function to add timeout to fetch requests
+const fetchWithTimeout = (path, timeout = 5000, options = {}) => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+  return apiFetchJson(path, {
+    ...options,
+    signal: controller.signal
+  }).finally(() => clearTimeout(timeoutId));
+};
+
 export const fetchCaseStudies = async () => {
-  const data = await apiFetchJson('/api/cases');
-  return Array.isArray(data) ? data.map(mapCaseItem) : [];
+  try {
+    const data = await fetchWithTimeout('/api/cases', 5000);
+    return Array.isArray(data) ? data.map(mapCaseItem) : [];
+  } catch (error) {
+    console.warn('Failed to fetch case studies:', error.message);
+    return [];
+  }
 };
 
 export const fetchInsights = async () => {
-  const data = await apiFetchJson('/api/insights');
-  return Array.isArray(data) ? data.map(mapInsightItem) : [];
+  try {
+    const data = await fetchWithTimeout('/api/insights', 5000);
+    return Array.isArray(data) ? data.map(mapInsightItem) : [];
+  } catch (error) {
+    console.warn('Failed to fetch insights:', error.message);
+    return [];
+  }
 };

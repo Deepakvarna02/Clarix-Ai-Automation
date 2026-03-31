@@ -53,6 +53,17 @@ app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
+// Request timeout middleware - 10 seconds for most routes, 30 for heavy operations
+app.use((req, res, next) => {
+  // Set timeout for the request
+  req.setTimeout(10000);
+  res.setTimeout(10000, () => {
+    console.error('Request timeout:', req.method, req.url);
+    res.status(503).json({ message: 'Request timeout' });
+  });
+  next();
+});
+
 // Global rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -67,8 +78,14 @@ const contactLimiter = rateLimit({
   message: { message: 'Too many contact attempts. Please try again in a few minutes.' }
 });
 
-// MongoDB connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/clarix')
+// MongoDB connection with timeouts
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/clarix', {
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 5000,
+  connectTimeoutMS: 5000,
+  retryWrites: true,
+  retryReads: true
+})
 .then(() => console.log('MongoDB connected'))
 .catch(err => console.error('MongoDB connection error:', err));
 
