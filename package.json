@@ -1,0 +1,11 @@
+{
+  "name": "mern-clarix",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "start": "npm --prefix client start",
+    "start:client": "npm --prefix client start",
+    "start:server": "npm --prefix server start",
+    "dev:server": "npm --prefix server run dev"
+  }
+}

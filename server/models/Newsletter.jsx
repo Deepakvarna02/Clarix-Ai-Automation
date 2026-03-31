@@ -1,0 +1,44 @@
+const mongoose = require('mongoose');
+
+const newsletterSchema = new mongoose.Schema({
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    lowercase: true,
+    trim: true
+  },
+  isSubscribed: {
+    type: Boolean,
+    default: true
+  },
+  subscribedAt: {
+    type: Date,
+    default: Date.now
+  },
+  unsubscribedAt: {
+    type: Date,
+    default: null
+  },
+  preferences: {
+    frequency: {
+      type: String,
+      enum: ['weekly', 'biweekly', 'monthly'],
+      default: 'weekly'
+    },
+    topics: {
+      type: [String],
+      default: ['all']
+    }
+  },
+  lastEmailSent: {
+    type: Date,
+    default: null
+  },
+  campaignsReceived: {
+    type: [String],
+    default: []
+  }
+}, { timestamps: true });
+
+module.exports = mongoose.model('Newsletter', newsletterSchema);
